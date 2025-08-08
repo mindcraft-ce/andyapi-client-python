@@ -220,7 +220,7 @@ class LocalClient:
         
         try:
             logger.info("Joining the pool...")
-            response = requests.post(f"{config['andy_api_url']}/api/andy/join_pool", json=payload, timeout=30)
+            response = requests.post(f"{config['andy_api_url']}/api/join_pool", json=payload, timeout=30)
             if response.status_code != 200:
                 logger.error(f"Failed to join pool: {response.status_code} - {response.text}")
                 return False
@@ -238,7 +238,7 @@ class LocalClient:
                 time.sleep(0.5 + i * 0.5) # Patient, staggered delay
                 ping_payload = {'host_id': received_host_id, 'current_load': 0, 'status': 'active'}
                 try:
-                    ping_response = requests.post(f"{config['andy_api_url']}/api/andy/ping_pool", json=ping_payload, timeout=5)
+                    ping_response = requests.post(f"{config['andy_api_url']}/api/ping_pool", json=ping_payload, timeout=5)
                     if ping_response.status_code == 200:
                         logger.info(f"Connection verified with ping on attempt {i+1}.")
                         self.host_id = received_host_id
@@ -262,7 +262,7 @@ class LocalClient:
             return True
             
         try:
-            requests.post(f"{self.config['andy_api_url']}/api/andy/leave_pool", json={'host_id': self.host_id}, timeout=10)
+            requests.post(f"{self.config['andy_api_url']}/api/leave_pool", json={'host_id': self.host_id}, timeout=10)
             logger.info(f"Successfully disconnected from Andy API pool (host_id: {self.host_id})")
         except Exception as e:
             logger.error(f"Error disconnecting from pool: {e}")
@@ -275,7 +275,7 @@ class LocalClient:
         if not self.is_connected or not self.host_id: return
         try:
             payload = {'host_id': self.host_id, 'current_load': sum(1 for m in self.models.values() if m.enabled), 'status': 'active'}
-            response = requests.post(f"{self.config['andy_api_url']}/api/andy/ping_pool", json=payload, timeout=10)
+            response = requests.post(f"{self.config['andy_api_url']}/api/ping_pool", json=payload, timeout=10)
             if response.status_code == 404:
                 logger.warning(f"Host not found in pool (host_id: {self.host_id}), marking as disconnected.")
                 self.is_connected = False
@@ -337,8 +337,8 @@ class LocalClient:
                     logger.info(f"Polling for work with models: {enabled_models}")
                     payload = {"host_id": self.host_id, "models": enabled_models, "timeout": 30}
                     
-                    logger.info(f"Sending POST to /api/andy/poll_for_work with payload: {payload}")
-                    response = requests.post(f"{self.config['andy_api_url']}/api/andy/poll_for_work", json=payload, timeout=35)
+                    logger.info(f"Sending POST to /api/poll_for_work with payload: {payload}")
+                    response = requests.post(f"{self.config['andy_api_url']}/api/poll_for_work", json=payload, timeout=35)
                     
                     logger.info(f"Poll response: {response.status_code}")
                     if response.status_code == 200:
@@ -419,7 +419,7 @@ class LocalClient:
         logger.info(f"Submitting result for work {work_id}...")
         try:
             payload = {"work_id": work_id, "result": result}
-            response = requests.post(f"{self.config['andy_api_url']}/api/andy/submit_work_result", json=payload, timeout=10)
+            response = requests.post(f"{self.config['andy_api_url']}/api/submit_work_result", json=payload, timeout=10)
             if response.status_code == 200:
                 logger.info(f"Successfully submitted result for work {work_id}.")
             else:
@@ -431,7 +431,7 @@ class LocalClient:
         logger.info(f"Submitting error for work {work_id}: {error}")
         try:
             payload = {"work_id": work_id, "error": error}
-            response = requests.post(f"{self.config['andy_api_url']}/api/andy/submit_work_result", json=payload, timeout=10)
+            response = requests.post(f"{self.config['andy_api_url']}/api/submit_work_result", json=payload, timeout=10)
             if response.status_code == 200:
                 logger.info(f"Successfully submitted error for work {work_id}.")
             else:

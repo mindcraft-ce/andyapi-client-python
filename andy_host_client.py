@@ -10,7 +10,7 @@ This script helps you:
 4. Send health pings to maintain pool membership
 
 Usage:
-    python andy_host_client.py --name "my-host" --andy-url https://mindcraft.riqvip.dev
+    python andy_host_client.py --name "my-host" --andy-url https://andy.mindcraft-ce.com
 
 Requirements:
     pip install requests
@@ -83,7 +83,7 @@ class AndyHostClient:
 
         data = {"info": {'name': self.host_name, 'capabilities': self.capabilities, 'models': models_to_advertise}}
         try:
-            response = requests.post(f"{self.andy_api_url}/api/andy/join_pool", json=data, timeout=10)
+            response = requests.post(f"{self.andy_api_url}/api/join_pool", json=data, timeout=10)
             if response.status_code == 200:
                 result = response.json()
                 with self.connection_lock:
@@ -108,7 +108,7 @@ class AndyHostClient:
         
         data = {'host_id': host_id, 'current_load': 0, 'status': 'active'}
         try:
-            response = requests.post(f"{self.andy_api_url}/api/andy/ping_pool", json=data, timeout=10)
+            response = requests.post(f"{self.andy_api_url}/api/ping_pool", json=data, timeout=10)
             if response.status_code == 200:
                 logger.debug("Ping sent successfully")
                 return True
@@ -129,7 +129,7 @@ class AndyHostClient:
             if not self.registered: return True
             data = {'host_id': self.host_id}
         try:
-            requests.post(f"{self.andy_api_url}/api/andy/leave_pool", json=data, timeout=10)
+            requests.post(f"{self.andy_api_url}/api/leave_pool", json=data, timeout=10)
             logger.info("Successfully left pool")
         except Exception as e:
             logger.error(f"Error leaving pool: {e}")
@@ -170,7 +170,7 @@ class AndyHostClient:
                         continue
                     
                     payload = {"host_id": host_id_for_poll, "models": [m['name'] for m in models]}
-                    response = requests.post(f"{self.andy_api_url}/api/andy/check_for_work", json=payload, timeout=10)
+                    response = requests.post(f"{self.andy_api_url}/api/check_for_work", json=payload, timeout=10)
 
                     if response.status_code == 200:
                         work_data = response.json()
@@ -214,7 +214,7 @@ class AndyHostClient:
         is_error = 'error' in result
         payload = {"work_id": work_id, "error" if is_error else "result": result.get('error') if is_error else result}
         try:
-            response = requests.post(f"{self.andy_api_url}/api/andy/submit_work_result", json=payload, timeout=10)
+            response = requests.post(f"{self.andy_api_url}/api/submit_work_result", json=payload, timeout=10)
             if response.status_code == 200:
                 logger.info(f"Successfully submitted {'error' if is_error else 'result'} for work {work_id}")
             else:

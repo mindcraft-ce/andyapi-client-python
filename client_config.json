@@ -1,9 +1,9 @@
 {
-  "andy_api_url": "https://mindcraft-ce.com",
+  "andy_api_url": "https://andy.mindcraft-ce.com",
   "ollama_url": "http://localhost:11434",
   "auto_connect": false,
   "max_vram_gb": 12.0,
   "report_interval": 10,
-  "client_name": "DEFAULT_CLIENT_NAME_PLEASE_CHANGE",
+  "client_name": "Default Client",
   "api_key": ""
 }

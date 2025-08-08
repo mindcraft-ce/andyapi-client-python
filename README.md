@@ -77,7 +77,7 @@ This mode is for users who prefer a lightweight, terminal-only experience.
 1.  **Start the client**:
     You must provide a unique `--name` for your host.
     ```bash
-    python3 andy_host_client.py --name "my-powerful-pc" --andy-url https://mindcraft.riqvip.dev --url http://localhost:11434
+    python3 andy_host_client.py --name "my-powerful-pc" --andy-url https://andy.mindcraft-ce.com --url http://localhost:11434
     ```
 
 2.  The client will automatically join the pool and begin sending health pings. To stop it, press `Ctrl+C`.
@@ -90,7 +90,7 @@ The web client can be configured in multiple ways (in order of priority):
 
 1.  **Environment Variables**:
     ```bash
-    export ANDY_API_URL="https://mindcraft-ce.com"
+    export ANDY_API_URL="https://andy.mindcraft-ce.com"
     export OLLAMA_URL="http://localhost:11434"
     export FLASK_PORT="5001" # Optional: change the web UI port
     python3 launch.py --mode web
@@ -121,4 +121,4 @@ python3 andy_host_client.py --help
 
 *   **Connection Issues to Andy API**:
     *   Check your internet connection and any firewall settings.
-    *   Verify the Andy API server URL is correct. The default is `https://mindcraft-ce.com`.
+    *   Verify the Andy API server URL is correct. The default is `https://andy.mindcraft-ce.com`.
