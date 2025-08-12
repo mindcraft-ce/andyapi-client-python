@@ -1,10 +1,10 @@
 {
   "andy_api_url": "https://andy.mindcraft-ce.com",
-  "ollama_url": "http://localhost:11434",
-  "client_name": "Default Client",
+  "base_api_url": "http://localhost:11434/v1",
+  "client_name": "Unnamed Client",
+  "flask_port": 5000,
   "auto_connect": false,
-  "max_vram_gb": 12,
-  "report_interval": 10,
-  "api_key": "",
-  "flask_port": 5000
+  "report_interval": 30,
+  "max_vram_gb": 0,
+  "api_key": ""
 }

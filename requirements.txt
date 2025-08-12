@@ -5,3 +5,4 @@ psutil>=5.9.0
 pynvml>=11.4.1
 GPUtil>=1.4.0
 ollama>=0.1.0
+openai>=0.27.0

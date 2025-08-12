@@ -25,26 +25,26 @@
 
         <div class="main-content">
             <div class="card">
-                <h2><i class="fas fa-link"></i> Connection</h2>
+                <h2><i class="fas fa-server"></i> Endpoint Configuration</h2>
                 <div class="setting-item">
-                    <label for="andy_api_url">Andy API URL</label>
-                    <input type="url" id="andy_api_url" value="{{ config.andy_api_url }}">
-                    <p class="help-text">The URL of the central Andy API server.</p>
-                </div>
-                <div class="setting-item">
-                    <label for="ollama_url">Ollama URL</label>
-                    <input type="url" id="ollama_url" value="{{ config.ollama_url }}">
-                    <p class="help-text">Your local Ollama server URL.</p>
-                </div>
-                 <div class="setting-item">
                     <label for="client_name">Client Name</label>
-                    <input type="text" id="client_name" value="{{ config.client_name }}">
+                    <input type="text" id="client_name" value="{{ config.client_name }}" placeholder="Unnamed Client">
                     <p class="help-text">A friendly name for this client in the pool dashboard.</p>
                 </div>
                 <div class="setting-item">
-                    <label for="api_key">API Key (Optional)</label>
-                    <input type="password" id="api_key" value="{{ config.api_key or '' }}" placeholder="Leave empty for anonymous access">
-                    <p class="help-text">API key for higher rate limits on the central server.</p>
+                    <label for="base_api_url">Base API URL</label>
+                    <input type="url" id="base_api_url" value="{{ config.base_api_url }}" placeholder="http://localhost:11434/v1">
+                    <p class="help-text">The base URL of your OpenAI-compatible endpoint. By default, this is set to local Ollama.</p>
+                </div>
+                <div class="setting-item">
+                    <label for="api_key">API Key</label>
+                    <input type="password" id="api_key" value="{{ config.api_key or '' }}" placeholder="e.g. 'ollama' or secret key">
+                    <p class="help-text">API key for the endpoint. For local Ollama, this is often 'ollama'.</p>
+                </div>
+                 <div class="setting-item">
+                    <label for="andy_api_url">Andy API URL</label>
+                    <input type="url" id="andy_api_url" value="{{ config.andy_api_url }}" disabled style="background-color: #f5f5f5; color: #666;">
+                    <p class="help-text">The URL of the central Andy API server. This can only be changed in the configuration file.</p>
                 </div>
             </div>
 
@@ -60,12 +60,12 @@
                 </div>
                 <div class="setting-item">
                     <label for="report_interval">Status Report Interval (seconds)</label>
-                    <input type="number" id="report_interval" min="10" max="300" value="{{ config.report_interval }}">
+                    <input type="number" id="report_interval" min="10" max="300" value="{{ config.report_interval }}" placeholder="30">
                     <p class="help-text">How often to send a heartbeat to the central server.</p>
                 </div>
                 <div class="setting-item">
                     <label for="max_vram_gb">Maximum VRAM (GB)</label>
-                    <input type="number" id="max_vram_gb" min="0" max="128" value="{{ config.max_vram_gb }}">
+                    <input type="number" id="max_vram_gb" min="0" max="128" value="{{ config.max_vram_gb }}" placeholder="0">
                     <p class="help-text">Total VRAM available for model hosting (0 for unknown).</p>
                 </div>
             </div>
@@ -74,7 +74,7 @@
         <div class="card">
             <div class="actions">
                 <button class="btn btn-success" onclick="saveSettings()"><i class="fas fa-save"></i> Save All Settings</button>
-                <button class="btn btn-secondary" onclick="testConnection()"><i class="fas fa-plug"></i> Test Connection</button>
+                <button class="btn btn-secondary" onclick="testConnection()"><i class="fas fa-plug"></i> Test Connections</button>
                 <button class="btn btn-danger" onclick="resetSettings()"><i class="fas fa-undo"></i> Reset to Defaults</button>
             </div>
         </div>
@@ -98,12 +98,12 @@
             showLoading(btn, 'Saving...');
             const settings = {
                 andy_api_url: document.getElementById('andy_api_url').value,
-                ollama_url: document.getElementById('ollama_url').value,
+                base_api_url: document.getElementById('base_api_url').value,
                 client_name: document.getElementById('client_name').value,
-                api_key: document.getElementById('api_key').value,
-                max_vram_gb: parseInt(document.getElementById('max_vram_gb').value),
+                auto_connect: document.getElementById('auto_connect').checked,
                 report_interval: parseInt(document.getElementById('report_interval').value),
-                auto_connect: document.getElementById('auto_connect').checked
+                max_vram_gb: parseInt(document.getElementById('max_vram_gb').value),
+                api_key: document.getElementById('api_key').value,
             };
 
             try {
@@ -114,7 +114,7 @@
                 });
                 const result = await response.json();
                 if (result.success) {
-                    alert('Settings saved successfully!');
+                    alert('Settings saved successfully! The new settings are now active.');
                 } else {
                     alert('Failed to save settings: ' + (result.error || 'Unknown error'));
                 }
@@ -128,35 +128,56 @@
         async function testConnection() {
             const btn = event.target;
             showLoading(btn, 'Testing...');
-            const ollamaUrl = document.getElementById('ollama_url').value;
-            const andyUrl = document.getElementById('andy_api_url').value;
             
-            let ollamaOk = false;
-            let andyOk = false;
-
-            try {
-                const ollamaRes = await fetch(ollamaUrl + '/api/tags', { signal: AbortSignal.timeout(3000) });
-                ollamaOk = ollamaRes.ok;
-            } catch (e) { /* ignore */ }
+            const testData = {
+                base_api_url: document.getElementById('base_api_url').value,
+                api_key: document.getElementById('api_key').value,
+                andy_api_url: document.getElementById('andy_api_url').value
+            };
             
             try {
-                const andyRes = await fetch(andyUrl + '/api/ping', { signal: AbortSignal.timeout(3000) });
-                andyOk = andyRes.ok;
-            } catch (e) { /* ignore */ }
-
-            hideLoading(btn);
-            alert(`Connection Test Results:\n- Ollama (${ollamaUrl}): ${ollamaOk ? '✅ Connected' : '❌ Failed'}\n- Andy API (${andyUrl}): ${andyOk ? '✅ Connected' : '❌ Failed'}`);
+                const response = await fetch('/api/test_connections', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+                
+                const results = await response.json();
+                
+                let message = 'Connection Test Results:\n\n';
+                
+                // OpenAI-compatible endpoint results
+                if (results.endpoint_ok) {
+                    message += `✅ Base API URL: Connected\n   Found ${results.models_count} models\n\n`;
+                } else {
+                    message += `❌ Base API URL: Failed\n   ${results.endpoint_error}\n\n`;
+                }
+                
+                // Andy API results
+                if (results.andy_ok) {
+                    message += `✅ Andy API: Connected`;
+                } else {
+                    message += `❌ Andy API: Failed\n   ${results.andy_error}`;
+                }
+                
+                alert(message);
+                
+            } catch (error) {
+                alert('Error testing connections: ' + error.message);
+            } finally {
+                hideLoading(btn);
+            }
         }
 
         function resetSettings() {
             if (confirm('Are you sure you want to reset all settings to their defaults?')) {
-                document.getElementById('andy_api_url').value = 'http://localhost:3002';
-                document.getElementById('ollama_url').value = 'http://localhost:11434';
+                document.getElementById('andy_api_url').value = 'https://andy.mindcraft-ce.com';
+                document.getElementById('base_api_url').value = 'http://localhost:11434/v1';
                 document.getElementById('client_name').value = 'Unnamed Client';
-                document.getElementById('api_key').value = '';
-                document.getElementById('max_vram_gb').value = 0;
-                document.getElementById('report_interval').value = 30;
                 document.getElementById('auto_connect').checked = false;
+                document.getElementById('report_interval').value = 30;
+                document.getElementById('max_vram_gb').value = 0;
+                document.getElementById('api_key').value = '';
                 alert('Settings reset. Click "Save All Settings" to apply.');
             }
         }

@@ -63,16 +63,30 @@
             <div class="card">
                 <h2><i class="fas fa-brain"></i> Models Overview</h2>
                 <div class="models-list">
-                    {% for model_name, model in models.items() %}
+                    {% if models|length == 0 %}
+                    <p style="text-align: center; opacity: 0.7; padding: 20px;">No models found. Try discovering them via the Models page.</p>
+                    {% else %}
+                    {% for model_name, model in models|dictsort %}
+                    {% if model.enabled %}
                     <div class="model-item">
                         <span class="model-name">{{ model_name }}</span>
                         <span class="model-status {{ 'status-enabled' if model.enabled else 'status-disabled' }}">
                             {{ 'Enabled' if model.enabled else 'Disabled' }}
                         </span>
                     </div>
-                    {% else %}
-                    <p style="text-align: center; opacity: 0.7; padding: 20px;">No models found. Try discovering them in Settings.</p>
+                    {% endif %}
                     {% endfor %}
+                    {% for model_name, model in models|dictsort %}
+                    {% if not model.enabled %}
+                    <div class="model-item">
+                        <span class="model-name">{{ model_name }}</span>
+                        <span class="model-status {{ 'status-enabled' if model.enabled else 'status-disabled' }}">
+                            {{ 'Enabled' if model.enabled else 'Disabled' }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
                 </div>
                 <div class="actions">
                     <a href="/models" class="btn">Manage Models</a>
@@ -96,7 +110,7 @@
                 <h2><i class="fas fa-cog"></i> Configuration</h2>
                 <div style="font-size: 0.9em; line-height: 1.8;">
                     <p><strong>Andy API URL:</strong> {{ config.andy_api_url }}</p>
-                    <p><strong>Ollama URL:</strong> {{ config.ollama_url }}</p>
+                    <p><strong>API Base URL:</strong> {{ config.base_api_url }}</p>
                 </div>
                 <div class="actions">
                     <a href="/settings" class="btn">Update Settings</a>
@@ -108,10 +122,9 @@
             <p>Andy API Local Client</p>
         </footer>
     </div>
-
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
     <script>
-        function showLoading(btn, text = 'Loading...') {
+                function showLoading(btn, text = 'Loading...') {
             btn.disabled = true;
             btn.dataset.originalText = btn.textContent;
             btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${text}`;

@@ -67,7 +67,10 @@
             </div>
             
             <div class="model-grid" id="modelGrid">
-                {% for model_name, model in models.items() %}
+                {% set found = false %}
+                {% for model_name, model in models|dictsort %}
+                {% if model.enabled %}
+                {% set found = true %}
                 <div class="model-card {{ 'enabled' if model.enabled else '' }}" data-model-name="{{ model_name }}">
                     <div class="model-header">
                         <span class="model-name">{{ model_name }}</span>
@@ -105,12 +108,56 @@
                         <button class="btn btn-small" onclick="saveModelConfig('{{ model_name }}', this)">Save Settings</button>
                     </div>
                 </div>
-                {% else %}
+                {% endif %}
+                {% endfor %}
+                {% for model_name, model in models|dictsort %}
+                {% if not model.enabled %}
+                {% set found = true %}
+                <div class="model-card {{ 'enabled' if model.enabled else '' }}" data-model-name="{{ model_name }}">
+                    <div class="model-header">
+                        <span class="model-name">{{ model_name }}</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" {{ 'checked' if model.enabled else '' }} 
+                                   onchange="toggleModel('{{ model_name }}', this)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="model-details">
+                        <div class="capability-section">
+                            <div class="capability-item">
+                                <input type="checkbox" id="embed-{{ loop.index }}" data-model="{{ model_name }}" data-setting="supports_embedding" {{ 'checked' if model.supports_embedding else '' }}>
+                                <label for="embed-{{ loop.index }}">Embedding</label>
+                            </div>
+                            <div class="capability-item">
+                                <input type="checkbox" id="vision-{{ loop.index }}" data-model="{{ model_name }}" data-setting="supports_vision" {{ 'checked' if model.supports_vision else '' }}>
+                                <label for="vision-{{ loop.index }}">Vision</label>
+                            </div>
+                            <div class="capability-item">
+                                <input type="checkbox" id="audio-{{ loop.index }}" data-model="{{ model_name }}" data-setting="supports_audio" {{ 'checked' if model.supports_audio else '' }}>
+                                <label for="audio-{{ loop.index }}">Audio</label>
+                            </div>
+                        </div>
+                        <div class="settings-section">
+                            <div class="setting-item">
+                                <label for="max-concurrent-{{ loop.index }}">Max Concurrent:</label>
+                                <input type="number" id="max-concurrent-{{ loop.index }}" data-model="{{ model_name }}" data-setting="max_concurrent" value="{{ model.max_concurrent }}" min="1">
+                            </div>
+                            <div class="setting-item">
+                                <label for="context-length-{{ loop.index }}">Context Length:</label>
+                                <input type="number" id="context-length-{{ loop.index }}" data-model="{{ model_name }}" data-setting="context_length" value="{{ model.context_length }}" min="1">
+                            </div>
+                        </div>
+                        <button class="btn btn-small" onclick="saveModelConfig('{{ model_name }}', this)">Save Settings</button>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% if not found %}
                 <div style="text-align: center; padding: 40px 0;">
                     <h3>No models found in Ollama.</h3>
                     <p>Please ensure Ollama is running and has models installed.</p>
                 </div>
-                {% endfor %}
+                {% endif %}
             </div>
         </div>
     </div>
