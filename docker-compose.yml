@@ -1,11 +1,11 @@
 services:
   local_client:
     container_name: local_client
-    image: python:3.13-slim
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
-      - ./:/app
-    working_dir: /app
-    command: sh -c "pip install -r requirements.txt && python launch.py"
+      - ./local_client:/app/local_client
     ports:
       - "5000:5000"
     networks:

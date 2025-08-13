@@ -6,6 +6,7 @@ A modern web-based interface for connecting any OpenAI-compatible AI endpoint to
 
 *   **Universal Compatibility**: Works with any OpenAI-compatible endpoint including:
     *   **OpenAI API** (https://api.openai.com/v1) - GPT-4, o3, and other OpenAI models
+    *   **OpenRouter API** (https://openrouter.ai/api/v1)
     *   **Ollama** (recommended for local models)
     *   **LM Studio**
     *   **Text Generation WebUI (oobabooga)**
@@ -32,7 +33,8 @@ A modern web-based interface for connecting any OpenAI-compatible AI endpoint to
 *   **`launch.py`**: Main entry point to start the web interface
 *   **`app.py`**: Complete Flask web application with dashboard, model management, and metrics
 *   **`requirements.txt`**: Python dependencies for the project
-*   **`docker-compose.yml`**: Docker configuration for containerized deployment
+*   **`Dockerfile`**: Docker image definition for secure containerized deployment
+*   **`docker-compose.yml`**: Docker Compose configuration for easy container management
 *   **`local_client/`**: Configuration and data directory
     *   **`client_config.json`**: Main configuration file for the web interface
 *   **`templates/`**: HTML templates for the web interface
@@ -46,7 +48,7 @@ A modern web-based interface for connecting any OpenAI-compatible AI endpoint to
 
 ### Prerequisites
 
-*   **Python 3.8+**
+*   **Python 3.8+** (Python 3.12+ recommended for best compatibility)
 *   **Any OpenAI-compatible AI server** such as:
     *   **[OpenAI API](https://platform.openai.com/)** - Official OpenAI models (requires API key)
     *   [Ollama](https://ollama.com/) (recommended for local models)
@@ -82,15 +84,40 @@ A modern web-based interface for connecting any OpenAI-compatible AI endpoint to
 
 ### Docker Deployment
 
-For containerized deployment:
+For containerized deployment, you can use either Docker directly or Docker Compose:
 
+**Option 1: Docker Compose (Recommended)**
 ```bash
-# Start with Docker Compose
+# Build and start the container
 docker-compose up -d
 
 # View logs
-docker-compose logs -f
+docker-compose logs -f local_client
+
+# Stop the container
+docker-compose down
 ```
+
+**Option 2: Docker Build & Run**
+```bash
+# Build the image
+docker build -t andy-api-client .
+
+# Run the container
+docker run -d \
+  --name andy-api-client \
+  -p 5000:5000 \
+  -v ./local_client:/app/local_client \
+  andy-api-client
+
+# View logs
+docker logs -f andy-api-client
+```
+
+The Docker setup includes:
+- **Persistent Configuration**: Your settings in `local_client/` are preserved between container restarts
+- **Port Mapping**: Web interface accessible at `http://localhost:5000`
+- **Volume Mounting**: Configuration and database files are stored on the host
 
 ## 🎮 Using the Interface
 
@@ -166,6 +193,12 @@ Edit `local_client/client_config.json`:
 ```
 Base API URL: https://api.openai.com/v1
 API Key: sk-... (required - get from https://platform.openai.com/api-keys)
+```
+
+**OpenRouter API**:
+```
+Base API URL: https://openrouter.ai/api/v1
+API Key: sk-... (required - get from https://openrouter.ai/settings/keys)
 ```
 
 **Ollama (Default)**:
