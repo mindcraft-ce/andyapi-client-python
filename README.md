@@ -1,5 +1,8 @@
 # Andy API Local Client
 
+> [!CAUTION]
+> **The python local client has been discontinued. Please use the [go local client](https://github.com/mindcraft-ce/andyapi-client-go) instead.**
+
 A modern web-based interface for connecting any OpenAI-compatible AI endpoint to the distributed Andy API compute pool. Share your local AI models and contribute your hardware resources to the network.
 
 ## 🚀 Features
